@@ -1,0 +1,92 @@
+
+<MyLayout>:
+
+    mail: mail
+    ip_address: ip_address
+    save_dir: save_dir
+    web_cam: web_cam
+
+    FloatLayout:
+        size: root.width, root.height
+        canvas.before:
+            Color:
+                rgba: 73/255, 79/255, 193/255, 1
+            Rectangle:
+                # self here refers to the widget i.e FloatLayout
+                pos: self.pos
+                size: self.size
+
+        TextInput:
+            cursor_color: (160/255, 254/255, 251/255, 1)
+            background_color: (253/255, 8/255, 74/255, 1)
+            foreground_color: (160/255, 254/255, 251/255, 1)
+            id: ip_address
+            multiline: False
+            size_hint: 0.15, 0.1
+            pos_hint: {"x": 0.025, "top": 0.8}
+
+        TextInput:
+            cursor_color: (160/255, 254/255, 251/255, 1)
+            background_color: (253/255, 8/255, 74/255, 1)
+            foreground_color: (160/255, 254/255, 251/255, 1)
+            id: mail
+            multiline: False
+            size_hint: 0.15, 0.1
+            pos_hint: {"x": 0.025, "top": 0.6}
+
+        TextInput:
+            cursor_color: (160/255, 254/255, 251/255, 1)
+            background_color: (253/255, 8/255, 74/255, 1)
+            foreground_color: (160/255, 254/255, 251/255, 1)
+            id: save_dir
+            multiline: False
+            size_hint: 0.15, 0.1
+            pos_hint: {"x": 0.025, "top": 0.4}
+
+        Button:
+            background_normal: ''
+            background_color: (160/255, 254/255, 251/255, 1)
+            color: (253/255, 8/255, 74/255, 1)
+            bold: True
+            text: "START"
+            on_press: root.process_data()
+            font_Size: 40
+            size_hint: 0.1, 0.1
+            pos_hint: {"x": 0.05, "top": 0.15}
+
+        Image:
+            id: web_cam
+            source: 'unv_image.webp'
+            size_hint: 0.8, 1
+            pos_hint: {"x": 0.2, "top": 1}
+            allow_stretch: True
+            keep_ratio: False
+        
+        Label:
+            color: (160/255, 254/255, 251/255, 1)
+            bold: True
+            size_hint: None, None
+            size: self.texture_size
+            font_size: 14
+            pos_hint: {'x': 0.0235, 'top': 0.838}
+            text: "Camera IP address"
+
+        Label:
+            color: (160/255, 254/255, 251/255, 1)
+            bold: True 
+            size_hint: None, None
+            size: self.texture_size
+            font_size: 14
+            pos_hint: {'x': 0.0235, 'top': 0.638}
+            text: "Email"
+        
+        Label:
+            color: (160/255, 254/255, 251/255, 1)
+            bold: True
+            size_hint: None, None
+            size: self.texture_size
+            font_size: '14dp'
+            pos_hint: {'x': 0.0235, 'top': 0.438}
+            text: "Save directory"
+
+
