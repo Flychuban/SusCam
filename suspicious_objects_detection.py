@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-import cv2
+import cv2 #ok
 from time import time
 from ultralytics import YOLO
 
@@ -13,16 +13,17 @@ import cv2
 import numpy as np
 import time
 import datetime
-from email.message import EmailMessage
+from email.message import EmailMessage #ok
 import ssl
 import smtplib
-from pygame import mixer
+from pygame import mixer #ok
 from pathlib import Path
 import arrow
 
 
+
 # Import kivy UX components
-from kivy.app import App
+from kivy.app import App #ok
 from kivy.uix.widget import Widget
 from kivy.properties import ObjectProperty
 from kivy.uix.floatlayout import FloatLayout
@@ -37,14 +38,11 @@ from kivy.clock import Clock
 from kivy.graphics.texture import Texture
 from kivy.logger import Logger
 
-# Import other dependencies
-import cv2
-import numpy as np
-
 
     
 
-sound_path = r"C:\Users\sas\Desktop\camera_yolo\SusCam\mixkit-police-siren-1641.wav"
+# sound_path = r"C:\Users\sas\Desktop\camera_yolo\SusCam\mixkit-police-siren-1641.wav"
+sound_path = r"C:\Users\User\Desktop\SusCam\mixkit-police-siren-1641.wav"
 
 mixer.init()
 mixer.music.load(sound_path)
