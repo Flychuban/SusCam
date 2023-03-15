@@ -39,16 +39,19 @@ from kivy.graphics.texture import Texture
 from kivy.logger import Logger
 
 
-    
+from dotenv import load_dotenv
 
-# sound_path = r"C:\Users\sas\Desktop\camera_yolo\SusCam\mixkit-police-siren-1641.wav"
-sound_path = r"C:\Users\User\Desktop\SusCam\mixkit-police-siren-1641.wav"
+load_dotenv()
+SECOND_CAPTURE = os.getenv("SECOND_CAPTURE")
+
+sound_path = r"C:\Users\sas\Desktop\camera_yolo\SusCam\mixkit-police-siren-1641.wav"
+# sound_path = r"C:\Users\User\Desktop\SusCam\mixkit-police-siren-1641.wav"
 
 mixer.init()
 mixer.music.load(sound_path)
 
 email_sender = 'kaloanas07@gmail.com'
-email_password = 'ufmfgkixttmtekbo' #2nd capture verification 
+email_password = SECOND_CAPTURE #2nd capture verification 
 
 
 subject = "New suspicious object was detected"
