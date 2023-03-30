@@ -11,3 +11,6 @@ SusCam is a camera with AI, which detects dangerous and suspicious objects. With
 ![SAVEPATH](User_guide_suscam_3.jpg)
 
 4. Click "Start" button.
+
+5. Camera starts working. If it detects suspicious object, it will send you email with video.
+![START]("C:\Users\sas\Desktop\Screenshot_suscam_live_3.jpg")
