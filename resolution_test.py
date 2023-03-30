@@ -1,24 +1,66 @@
 import cv2
 import os
+import datetime
+import time
+from dotenv import load_dotenv
+import ssl
+import smtplib
+from email.message import EmailMessage #ok
 
 out = None
 
-cap = cv2.VideoCapture("rtsp://admin123:admin123@192.168.0.104:554/stream1")
+cap = cv2.VideoCapture("rtsp://admin123:admin123@192.168.0.105:554/stream1")
 cap.set(3, 1920)
 cap.set(4, 1080)
 
 user_save_dir = r"C:\Users\sas\Videos\Captures"
-new_video_name = "test2.mp4"
+new_video_name = "test3.mp4"
 frame_size = (1920, 1080)
 fourcc = cv2.VideoWriter_fourcc(*"mp4v")
 
 out = cv2.VideoWriter(os.path.join(user_save_dir, new_video_name), fourcc, 20, frame_size)
+user_save_dir = r"C:\Users\sas\Videos\Captures"
+
+
+load_dotenv()
+time_started = time.time()
+
+SECONDS_TO_RECORD_AFTER_DETECTION = 5
+
+SECOND_CAPTURE = os.getenv("SECOND_CAPTURE")
+email_sender = 'kaloanas07@gmail.com'
+email_password = SECOND_CAPTURE #2nd capture verification 
+user_email = "kaloanas07@gmail.com"
+
+subject = "New suspicious object was detected"
+body = """Please, check this video attachment for suspicious object. 
+"""
+
 while cap.isOpened():
     ret, frame = cap.read()
     
     cv2.imshow('YOLO', frame)
     out.write(frame)
     
+    if time.time() - time_started >= SECONDS_TO_RECORD_AFTER_DETECTION:
+        out.release()
+        em = EmailMessage()
+        em['From'] = email_sender
+        em['To'] = user_email
+        em['subject'] = subject
+        em.set_content(body)
+    
+        VIDEO_PATH = f"{user_save_dir}\\{new_video_name}"
+        with open(VIDEO_PATH, "rb") as f:
+            file_data = f.read()
+            file_name = f.name
+            em.add_attachment(file_data, maintype="application", subtype="mp4", filename=file_name)
+
+        context = ssl.create_default_context()
+
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+            smtp.login(email_sender, email_password) 
+            smtp.sendmail(email_sender, user_email, em.as_string())
     if cv2.waitKey(10) & 0xFF == ord('q'):
         out.release()
         break

@@ -9,7 +9,6 @@ from supervision import Detections
 from supervision import BoxAnnotator
 
 import os
-import cv2
 import numpy as np
 import time
 import datetime
@@ -72,8 +71,8 @@ class MyLayout(Widget):
     
     def process_data(self):
         self.save_dir = f"{self.save_dir.text}"
-        # self.ip_address = int(self.ip_address.text) #this is for webcam
-        self.ip_address = self.ip_address.text
+        self.ip_address = int(self.ip_address.text) #this is for webcam
+        # self.ip_address = self.ip_address.text
         self.mail = self.mail.text
         
         self.obj_det = ObjectDetection(self.mail, self.save_dir)
@@ -141,7 +140,7 @@ class ObjectDetection:
 
     def load_model(self):
        
-        model = YOLO("yolov8m.pt")  # load a pretrained YOLOv8n model
+        model = YOLO(r"C:\Users\sas\Desktop\camera_yolo\mymodel23.pt")  # load a pretrained YOLOv8n model
         model.fuse()
     
         return model
