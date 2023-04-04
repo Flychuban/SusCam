@@ -14,3 +14,7 @@ SusCam is a camera with AI, which detects dangerous and suspicious objects. With
 
 5. Camera starts working. If it detects suspicious object, it will send you email with video.
 ![START](Screenshot_suscam_live.jpg)
+
+
+## License
+[MIT License](LICENSE)
