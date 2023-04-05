@@ -9,7 +9,6 @@ from supervision import Detections
 from supervision import BoxAnnotator
 
 import os
-import numpy as np
 import time
 import datetime
 from email.message import EmailMessage #ok
@@ -41,6 +40,7 @@ from kivy.logger import Logger
 from dotenv import load_dotenv
 
 load_dotenv()
+EMAIL_SENDER = os.getenv("EMAIL_SENDER")
 SECOND_CAPTURE = os.getenv("SECOND_CAPTURE")
 
 sound_path = r"C:\Users\sas\Desktop\camera_yolo\SusCam\mixkit-police-siren-1641.wav"
@@ -49,7 +49,7 @@ sound_path = r"C:\Users\sas\Desktop\camera_yolo\SusCam\mixkit-police-siren-1641.
 mixer.init()
 mixer.music.load(sound_path)
 
-email_sender = 'kaloanas07@gmail.com'
+email_sender = EMAIL_SENDER
 email_password = SECOND_CAPTURE #2nd capture verification 
 
 
@@ -71,14 +71,17 @@ class MyLayout(Widget):
     
     def process_data(self):
         self.save_dir = f"{self.save_dir.text}"
-        self.ip_address = int(self.ip_address.text) #this is for webcam
-        # self.ip_address = self.ip_address.text
+        if self.ip_address.text.isnumeric():
+            self.ip_address = int(self.ip_address.text) #this is for webcam
+        else:
+            self.ip_address = self.ip_address.text #this is for ip camera
         self.mail = self.mail.text
         
         self.obj_det = ObjectDetection(self.mail, self.save_dir)
         
         criticalTime = arrow.now().shift(hours=+5).shift(days=-7) # here specify time to remove
 
+        # Remove old files
         for item in Path(self.save_dir).glob('*'):
             if item.is_file():
                 print (str(item.absolute()))
@@ -87,11 +90,13 @@ class MyLayout(Widget):
                     os.remove(item)
     
         # Setup video capture device
-        self.capture = cv2.VideoCapture(self.ip_address)
-        # self.capture = cv2.VideoCapture(self.ip_address)
-        assert self.capture.isOpened()
-        self.capture.set(3, 1280)
-        self.capture.set(4, 720)
+        try:
+            self.capture = cv2.VideoCapture(self.ip_address)
+            assert self.capture.isOpened()
+            self.capture.set(3, 1280)
+            self.capture.set(4, 720)
+        except Exception:
+            raise Exception("Could not open webcam")
         
         Clock.schedule_interval(self.update, 1.0/33.0)
 
@@ -140,9 +145,12 @@ class ObjectDetection:
 
     def load_model(self):
        
-        model = YOLO(r"C:\Users\sas\Desktop\camera_yolo\mymodel23.pt")  # load a pretrained YOLOv8n model
-        model.fuse()
-    
+        try:
+            model = YOLO("mymodel23.pt")  # load a pretrained YOLOv8n model
+            model.fuse()
+        except Exception:
+            raise Exception("Could not load ML model")
+        
         return model
 
 
@@ -182,47 +190,49 @@ class ObjectDetection:
         self.labels = [f"{self.CLASS_NAMES_DICT[class_id]} {confidence:0.2f}"
         for _, confidence, class_id, tracker_id
         in detections]
-        
-        if confidences:
-            if self.detection:
-                self.timer_started = False
-            else:
-                mixer.music.play()
-                self.detection = True
-                current_time = datetime.datetime.now().strftime("%d-%m-%Y-%H-%M-%S")
-                self.new_video_name = f"{current_time}.mp4"
-                print("Beginning recording")
-                self.out = cv2.VideoWriter(os.path.join(self.user_save_dir, self.new_video_name), fourcc, 20, frame_size)
-        elif self.detection:
-            if self.timer_started:
-                if time.time() - self.detection_stopped_time >= SECONDS_TO_RECORD_AFTER_DETECTION:
-                    self.detection = False
+        try:
+            if confidences:
+                if self.detection:
                     self.timer_started = False
-                    self.out.release()
-                    em = EmailMessage()
-                    em['From'] = email_sender
-                    em['To'] = self.user_email
-                    em['subject'] = subject
-                    em.set_content(body)
-                
-                    VIDEO_PATH = f"{self.user_save_dir}\\{self.new_video_name}"
-                    with open(VIDEO_PATH, "rb") as f:
-                        file_data = f.read()
-                        file_name = f.name
-                        em.add_attachment(file_data, maintype="application", subtype="mp4", filename=file_name)
+                else:
+                    mixer.music.play()
+                    self.detection = True
+                    current_time = datetime.datetime.now().strftime("%d-%m-%Y-%H-%M-%S")
+                    self.new_video_name = f"{current_time}.mp4"
+                    print("Beginning recording")
+                    self.out = cv2.VideoWriter(os.path.join(self.user_save_dir, self.new_video_name), fourcc, 20, frame_size)
+            elif self.detection:
+                if self.timer_started:
+                    if time.time() - self.detection_stopped_time >= SECONDS_TO_RECORD_AFTER_DETECTION:
+                        self.detection = False
+                        self.timer_started = False
+                        self.out.release()
+                        em = EmailMessage()
+                        em['From'] = email_sender
+                        em['To'] = self.user_email
+                        em['subject'] = subject
+                        em.set_content(body)
+                    
+                        VIDEO_PATH = f"{self.user_save_dir}\\{self.new_video_name}"
+                        with open(VIDEO_PATH, "rb") as f:
+                            file_data = f.read()
+                            file_name = f.name
+                            em.add_attachment(file_data, maintype="application", subtype="mp4", filename=file_name)
 
-                    context = ssl.create_default_context()
+                        context = ssl.create_default_context()
 
-                    with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
-                        smtp.login(email_sender, email_password) 
-                        smtp.sendmail(email_sender, self.user_email, em.as_string())
-            else:
-                self.timer_started = True
-                self.detection_stopped_time = time.time()
+                        with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+                            smtp.login(email_sender, email_password) 
+                            smtp.sendmail(email_sender, self.user_email, em.as_string())
+                else:
+                    self.timer_started = True
+                    self.detection_stopped_time = time.time()
 
-        if self.detection:
-            print("Recording")
-            self.out.write(frame)
+            if self.detection:
+                print("Recording")
+                self.out.write(frame)
+        except Exception:
+            raise Exception("Error in recording")
 
         
         # Annotate and display frame
