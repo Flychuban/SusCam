@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-import cv2 #ok
+import cv2
 from time import time
 from ultralytics import YOLO
 
@@ -11,17 +11,16 @@ from supervision import BoxAnnotator
 import os
 import time
 import datetime
-from email.message import EmailMessage #ok
+from email.message import EmailMessage
 import ssl
 import smtplib
-from pygame import mixer #ok
+from pygame import mixer
 from pathlib import Path
 import arrow
-
-
+from dotenv import load_dotenv
 
 # Import kivy UX components
-from kivy.app import App #ok
+from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.properties import ObjectProperty
 from kivy.uix.floatlayout import FloatLayout
@@ -30,21 +29,17 @@ from kivy.uix.image import Image
 from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
 
-
 # Import other kivy stuff
 from kivy.clock import Clock
 from kivy.graphics.texture import Texture
 from kivy.logger import Logger
 
 
-from dotenv import load_dotenv
-
 load_dotenv()
 EMAIL_SENDER = os.getenv("EMAIL_SENDER")
 SECOND_CAPTURE = os.getenv("SECOND_CAPTURE")
 
-sound_path = r"C:\Users\sas\Desktop\camera_yolo\SusCam\mixkit-police-siren-1641.wav"
-# sound_path = r"C:\Users\User\Desktop\SusCam\mixkit-police-siren-1641.wav"
+sound_path = r"mixkit-police-siren-1641.wav"
 
 mixer.init()
 mixer.music.load(sound_path)
@@ -117,7 +112,6 @@ class MyLayout(Widget):
 
 
 class CamApp(App):
-    
     def build(self):
         return MyLayout()
 
@@ -144,9 +138,9 @@ class ObjectDetection:
     
 
     def load_model(self):
-       
         try:
-            model = YOLO("mymodel23.pt")  # load a pretrained YOLOv8n model
+            model = YOLO("nano_model.pt")
+            # load a pretrained YOLOv8n model
             model.fuse()
         except Exception:
             raise Exception("Could not load ML model")
@@ -155,28 +149,24 @@ class ObjectDetection:
 
 
     def predict(self, frame):
-       
-        results = self.model(frame)
-        
+        results = self.model(frame, conf=0.80) #This adjust the confidence level of the detection to plot a box
         return results
     
 
-    def plot_bboxes(self, results, frame):
-        
+    def plot_bboxes(self, results, frame):  
         xyxys = []
         confidences = []
         class_ids = []
+             
         
-        # Extract detections for person class
         for result in results[0]:
             class_id = result.boxes.cls.cpu().numpy().astype(int)
             
-            if result.boxes.conf.cpu().numpy() > 0.8:
+            if result.boxes.conf.cpu().numpy() > 0.9: #This adjust the confidence level of the detection to send an email and play a sound
                 
                 xyxys.append(result.boxes.xyxy.cpu().numpy())
                 confidences.append(result.boxes.conf.cpu().numpy())
-                class_ids.append(result.boxes.cls.cpu().numpy().astype(int))
-            
+                class_ids.append(result.boxes.cls.cpu().numpy().astype(int))     
         
         # Setup detections for visualization
         detections = Detections(
@@ -184,12 +174,13 @@ class ObjectDetection:
                     confidence=results[0].boxes.conf.cpu().numpy(),
                     class_id=results[0].boxes.cls.cpu().numpy().astype(int),
                     )
-        
     
         # Format custom labels
         self.labels = [f"{self.CLASS_NAMES_DICT[class_id]} {confidence:0.2f}"
-        for _, confidence, class_id, tracker_id
-        in detections]
+        for _, confidence, class_id, tracker_id in detections]
+        
+        print(f"Labels: {self.labels}")
+        
         try:
             if confidences:
                 if self.detection:
@@ -234,12 +225,9 @@ class ObjectDetection:
         except Exception:
             raise Exception("Error in recording")
 
-        
         # Annotate and display frame
-        frame = self.box_annotator.annotate(scene=frame, detections=detections, labels=self.labels)
-        
+        frame = self.box_annotator.annotate(scene=frame, detections=detections, labels=self.labels)       
         return frame
-                  
-        
+                        
 if __name__ == "__main__":
     CamApp().run()
