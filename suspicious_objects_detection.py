@@ -39,7 +39,7 @@ load_dotenv()
 EMAIL_SENDER = os.getenv("EMAIL_SENDER")
 SECOND_CAPTURE = os.getenv("SECOND_CAPTURE")
 
-sound_path = r"mixkit-police-siren-1641.wav"
+sound_path = r"images/mixkit-police-siren-1641.wav"
 
 mixer.init()
 mixer.music.load(sound_path)

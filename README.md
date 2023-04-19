@@ -2,18 +2,18 @@ SusCam is a camera with AI, which detects dangerous and suspicious objects. With
 
                                     User Guide:
 1. Write ip address of your camera in the app. If you have username and password, write it too.
-![IPADDRESS](User_guide_suscam_1.jpg)
+![IPADDRESS](images/User_guide_suscam_1.jpg)
 
 2. Write your email for notifications.
-![EMAIL](User_guide_suscam_2.jpg)
+![EMAIL](images/User_guide_suscam_2.jpg)
 
 3. Write your save path for videos.
-![SAVEPATH](User_guide_suscam_3.jpg)
+![SAVEPATH](images/User_guide_suscam_3.jpg)
 
 4. Click "Start" button.
 
 5. Camera starts working. If it detects suspicious object, it will send you email with video.
-![START](Screenshot_suscam_live.jpg)
+![START](images/Screenshot_suscam_live.jpg)
 
 
 ## License
